@@ -28,7 +28,7 @@ if __name__=='__main__':
         global conn
         if conn == None:
             conn=connect()
-        conn.basic_publish(body='SETTLE', exchange='', routing_key=os.environ.get('sender_queue'))
+        conn.basic_publish(body=os.environ.get('src_system'), exchange='', routing_key=os.environ.get('sender_queue'))
 
     channel.basic_consume(queue =os.environ.get('receiver_queue'),auto_ack = True,on_message_callback = callback)
     print(' [*] Waiting for messages. To exit press CTRL+C')
