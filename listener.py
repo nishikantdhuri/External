@@ -1,10 +1,10 @@
 import pika
 import time
 import os
-con_down=None
+conn=None
 import requests
 
-def connect_down_stream():
+def connect():
     connection = pika.BlockingConnection(pika.ConnectionParameters(host=os.environ.get('mq_host')))
     channel = connection.channel()
     channel.queue_declare(queue=os.environ.get('sender_queue'),durable=True)
@@ -25,10 +25,10 @@ if __name__=='__main__':
         dictToSend = {'status': os.environ.get('src_system')}
         requests.post('http://'+str(os.environ.get('tracer_ip'))+':'+str(5000)+'/soc', json=dictToSend)
         sleep()
-        global con_down
-        if con_down == None:
-            con_down=connect_down_stream()
-        con_down.basic_publish(body='SETTLE', exchange='', routing_key=os.environ.get('sender_queue'))
+        global conn
+        if conn == None:
+            conn=connect()
+        conn.basic_publish(body='SETTLE', exchange='', routing_key=os.environ.get('sender_queue'))
 
     channel.basic_consume(queue =os.environ.get('receiver_queue'),auto_ack = True,on_message_callback = callback)
     print(' [*] Waiting for messages. To exit press CTRL+C')
